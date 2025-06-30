@@ -3,7 +3,8 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.RobotNM;
+import org.firstinspires.ftc.teamcode.utils.priority.PriorityDevice;
 import org.firstinspires.ftc.teamcode.utils.priority.PriorityMotor;
 
 
@@ -15,12 +16,20 @@ public class DriveHWNikhil extends LinearOpMode {
         // create 4 motors, leftFront, left Rear, right front, and right rear
         // read the prioritymotor class if you don't know how to make one
         // remember hardware map exists :3
-        Robot robot = new Robot(hardwareMap);
+        RobotNM robot = new RobotNM(hardwareMap);
+        robot.setStopChecker(this::isStopRequested);
 
-        PriorityMotor leftFront = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "leftFont"), "leftFront", 4, 5, robot.sensors);
+        PriorityMotor leftFront = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "leftFront"), "leftFront", 4, 5, robot.sensors);
         PriorityMotor rightFront = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "rightFont"), "rightFront", 4, 5, robot.sensors);
         PriorityMotor leftRear = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "leftRear"), "leftRear", 4, 5, robot.sensors);
         PriorityMotor rightRear = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "rightRear"), "rightRear", 4, 5, robot.sensors);
+        PriorityMotor turret = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "turret"), "turret", 3, 5, robot.sensors);
+        robot.hardwareQueue.addDevice(leftFront);
+        robot.hardwareQueue.addDevice(rightFront);
+        robot.hardwareQueue.addDevice(leftRear);
+        robot.hardwareQueue.addDevice(rightRear);
+        robot.hardwareQueue.addDevice(turret);
+
 
         // init
         while(opModeInInit()) robot.update();
@@ -31,6 +40,7 @@ public class DriveHWNikhil extends LinearOpMode {
         // right is for turning
         double x, y, r, lf, rf, lr, rr, absMax;
         while(!isStopRequested()) {
+            robot.update();
 
             x = -gamepad1.left_stick_y;
             y = gamepad1.left_stick_x;

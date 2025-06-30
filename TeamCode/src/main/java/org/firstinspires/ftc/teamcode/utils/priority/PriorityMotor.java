@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.utils.priority;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.sensors.Sensors;
+import org.firstinspires.ftc.teamcode.sensors.SensorsNM;
 import org.firstinspires.ftc.teamcode.utils.Utils;
 
 public class PriorityMotor extends PriorityDevice {
@@ -11,22 +11,22 @@ public class PriorityMotor extends PriorityDevice {
     public DcMotorEx[] motor; // if the subsystem has multiple motors (i.e. slides)
     private double[] multipier;
 
-    Sensors sensors;
+    SensorsNM sensors;
 
     private double minPowerToOvercomeStaticFriction = 0.0;
     public static final int SWITCH_FROM_STATIC_TO_KINETIC_FRICTION = 75;
     private double minPowerToOvercomeKineticFriction = 0.0;
     private long lastZeroTime = 0;
 
-    public PriorityMotor(DcMotorEx motor, String name, double basePriority, double priorityScale, double multiplier, Sensors sensors) {
+    public PriorityMotor(DcMotorEx motor, String name, double basePriority, double priorityScale, double multiplier, SensorsNM sensors) {
         this(new DcMotorEx[] {motor}, name, basePriority, priorityScale, new double[]{multiplier}, sensors);
     }
 
-    public PriorityMotor(DcMotorEx motor, String name, double basePriority, double priorityScale, Sensors sensors) {
+    public PriorityMotor(DcMotorEx motor, String name, double basePriority, double priorityScale, SensorsNM sensors) {
         this(new DcMotorEx[] {motor}, name, basePriority, priorityScale, new double[]{1}, sensors);
     }
 
-    public PriorityMotor(DcMotorEx[] motor, String name, double basePriority, double priorityScale, double[] multiplier, Sensors sensors) {
+    public PriorityMotor(DcMotorEx[] motor, String name, double basePriority, double priorityScale, double[] multiplier, SensorsNM sensors) {
         super(basePriority, priorityScale, name);
         this.motor = motor;
         this.sensors = sensors;

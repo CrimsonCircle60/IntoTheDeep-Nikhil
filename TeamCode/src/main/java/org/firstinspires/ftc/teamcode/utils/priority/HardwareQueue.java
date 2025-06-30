@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.utils.Globals.GET_LOOP_TIME;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HardwareQueue {
     public ArrayList<PriorityDevice> devices = new ArrayList<>();
@@ -22,6 +23,10 @@ public class HardwareQueue {
 
     public void addDevice(PriorityDevice device) {
         devices.add(device);
+    }
+
+    public void addDevices(PriorityDevice... devices) {
+        this.devices.addAll(Arrays.asList(devices));
     }
 
     public void update() {

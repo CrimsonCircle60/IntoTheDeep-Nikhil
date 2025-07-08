@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.RobotNM;
-import org.firstinspires.ftc.teamcode.utils.priority.PriorityDevice;
 import org.firstinspires.ftc.teamcode.utils.priority.PriorityMotor;
 
 
@@ -23,12 +22,10 @@ public class DriveHWNikhil extends LinearOpMode {
         PriorityMotor rightFront = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "rightFont"), "rightFront", 4, 5, robot.sensors);
         PriorityMotor leftRear = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "leftRear"), "leftRear", 4, 5, robot.sensors);
         PriorityMotor rightRear = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "rightRear"), "rightRear", 4, 5, robot.sensors);
-        PriorityMotor turret = new PriorityMotor(hardwareMap.get(DcMotorEx.class, "turret"), "turret", 3, 5, robot.sensors);
         robot.hardwareQueue.addDevice(leftFront);
         robot.hardwareQueue.addDevice(rightFront);
         robot.hardwareQueue.addDevice(leftRear);
         robot.hardwareQueue.addDevice(rightRear);
-        robot.hardwareQueue.addDevice(turret);
 
 
         // init

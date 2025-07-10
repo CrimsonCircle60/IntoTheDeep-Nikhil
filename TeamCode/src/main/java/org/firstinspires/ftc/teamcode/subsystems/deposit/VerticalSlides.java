@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.utils.Utils;
 import org.firstinspires.ftc.teamcode.utils.priority.PriorityMotor;
 
 @Config
-public class Slides {
+public class VerticalSlides {
     public enum Type{
         HORIZONTAL,
         VERTICAL,
@@ -44,13 +44,13 @@ public class Slides {
     private final DcMotorEx m2;
 
 
-    public Slides(Robot robot) {
+    public VerticalSlides(Robot robot) {
         this.robot = robot;
 
-        m1 = robot.hardwareMap.get(DcMotorEx.class, "slidesMotor0");
-        m2 = robot.hardwareMap.get(DcMotorEx.class, "slidesMotor1");
+        m1 = robot.hardwareMap.get(DcMotorEx.class, "verticalSlidesMotor0");
+        m2 = robot.hardwareMap.get(DcMotorEx.class, "verticalSlidesMotor1");
 
-        slidesMotors = new PriorityMotor(new DcMotorEx[] {m1, m2}, "slidesMotor", 3, 5, new double[] {-1, 1}, robot.sensors);
+        slidesMotors = new PriorityMotor(new DcMotorEx[] {m1, m2}, "verticalSlidesMotor", 3, 5, new double[] {-1, 1}, robot.sensors);
         robot.hardwareQueue.addDevice(slidesMotors);
     }
 

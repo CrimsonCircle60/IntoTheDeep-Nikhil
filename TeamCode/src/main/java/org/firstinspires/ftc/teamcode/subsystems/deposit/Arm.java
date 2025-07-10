@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems.deposit;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImpl;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.sensors.Sensors;
@@ -13,8 +14,7 @@ public class Arm {
     public final Sensors sensors;
 
     public final nPriorityServo armRotation;
-    public final nPriorityServo clawRotation;
-    public final nPriorityServo claw;
+    public final nPriorityServo extendo;
 
     public static double openRad = 1.2456, closeRad = 0.10, closeLooseRad = 0.25;
 
@@ -24,55 +24,31 @@ public class Arm {
         armRotation = new nPriorityServo(
                 new Servo[] {robot.hardwareMap.get(Servo.class, "depositArmRotationL"), robot.hardwareMap.get(Servo.class, "depositArmRotationR")},
                 "depositArmRotation",
-                nPriorityServo.ServoType.AXON_MINI,
-                0.335,
-                0.982,
-                0.871,
+                nPriorityServo.ServoType.AXON_MINI, // TODO: find out the type of the servo
+                0.335, // TODO: find parameters
+                0.982, // TODO
+                0.871, // TODO
                 new boolean[] {false, true},
                 1.0,
-                2.0 // Tee hee - eric
+                2.0
         );
         robot.hardwareQueue.addDevice(armRotation);
 
-        clawRotation = new nPriorityServo(
-                new Servo[] {robot.hardwareMap.get(Servo.class, "depositClawRotation")},
-                "depositClawRotation",
-                nPriorityServo.ServoType.AXON_MAX,
-                0,
-                1,
-                0.32,
-                new boolean[] {true},
+        extendo = new nPriorityServo(
+                new Servo[] {robot.hardwareMap.get(Servo.class, "depositArmSlidesServo0"), robot.hardwareMap.get(ServoImpl.class, "depositArmSlidesServo1")},
+                "depositArmSlidesMotor",
+                nPriorityServo.ServoType.AXON_MAX, // TODO: find out the type of servo used here
+                0, // TODO: find parameters
+                1, // TODO
+                0.32, // TODO
+                new boolean[] {false, true}, // TODO: idk the proper order here, figure that out
                 1.0,
                 2.0
         );
-        robot.hardwareQueue.addDevice(clawRotation);
-
-        claw = new nPriorityServo(
-                new Servo[] {robot.hardwareMap.get(Servo.class, "depositClaw")},
-                "depositClaw",
-                nPriorityServo.ServoType.AXON_MINI,
-                0.028,
-                0.238,
-                0,
-                new boolean[] {false},
-                1.0,
-                2.0
-        );
-        robot.hardwareQueue.addDevice(claw);
+        robot.hardwareQueue.addDevices(armRotation, extendo);
     }
 
     public void setArmRotation(double targetRad, double power) { armRotation.setTargetAngle(targetRad, power); }
 
-    public void setClawRotation(double targetRad, double power) { clawRotation.setTargetAngle(targetRad, power); }
-
-    public void clawClose() { claw.setTargetAngle(closeRad, 1.0); }
-    public void clawCloseLoose() { claw.setTargetAngle(closeLooseRad, 1.0); }
-    public void clawOpen() { claw.setTargetAngle(openRad, 1.0); }
-
-    public boolean inPosition() { return armRotation.inPosition() && clawRotation.inPosition(); }
-
-    public boolean clawInPosition() { return claw.inPosition(); }
-
-    public boolean armInPosition() { return armRotation.inPosition(); }
-    public boolean clawRotInPosition() { return clawRotation.inPosition(); }
+    public boolean inPosition() { return armRotation.inPosition() && extendo.inPosition(); }
 }

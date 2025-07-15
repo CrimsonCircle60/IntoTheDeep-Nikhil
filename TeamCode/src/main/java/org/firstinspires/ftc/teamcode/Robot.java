@@ -80,7 +80,7 @@ public class Robot {
 
         hardwareQueue.update();
 
-        this.updateTelemetry(); // empty method for now fyi
+        this.updateTelemetry();
     }
 
     /**
@@ -125,8 +125,6 @@ public class Robot {
     }
 
     private void updateTelemetry() {
-    /*
-     * no clue what this is for so I'm getting rid of it until I understand it
 
         Canvas canvas = TelemetryUtil.packet.fieldOverlay();
         for (Consumer<Canvas> task : canvasDrawTasks) task.accept(canvas);
@@ -135,7 +133,5 @@ public class Robot {
         //LogUtil.loopTime.set(GET_LOOP_TIME());
         TelemetryUtil.sendTelemetry();
         LogUtil.send();
-     *
-     */
     }
 }

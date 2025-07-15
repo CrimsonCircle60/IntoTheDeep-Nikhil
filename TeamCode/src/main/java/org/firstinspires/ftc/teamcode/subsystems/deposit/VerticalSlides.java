@@ -12,11 +12,10 @@ import org.firstinspires.ftc.teamcode.utils.priority.PriorityMotor;
 
 @Config
 public class VerticalSlides {
-    public enum Type{
-        HORIZONTAL,
-        VERTICAL,
-        ARM
-    }
+
+    public static final double MIN_HEIGHT = 15.0; //  the starting height of the arm (at the top of the slides), account for the robot drivetrain height
+    // Set this as the baseline, so length equals 0 here
+    // TODO: need to figure out what the minimum slides height actually is
 
     //public static double maxVel = 55.75589743589743;
     //public static double kP = 0.8;
@@ -126,6 +125,10 @@ public class VerticalSlides {
     public boolean inPosition(double threshold) {
         if (targetLength <= threshold) return length <= threshold;
         return Math.abs(targetLength - length) <= threshold;
+    }
+
+    public boolean inPosition() {
+        return inPosition(0.1);
     }
 
     public double getLength() {

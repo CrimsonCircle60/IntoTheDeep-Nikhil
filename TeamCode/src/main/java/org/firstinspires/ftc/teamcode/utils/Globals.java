@@ -10,7 +10,8 @@ public class Globals {
     public static RunMode RUNMODE = RunMode.TESTER;
     public static boolean TESTING_DISABLE_CONTROL = true;
     public static boolean isRed = false;
-    public static boolean hasSpecimenPreload = false;
+    public static boolean hasColorlessPixelPreload = false;
+    public static boolean hasColorfulPixelPreload = false;
     public static boolean hasSamplePreload = false;
     public static long autoStartTime = -1;
     public static boolean autoHang = true;

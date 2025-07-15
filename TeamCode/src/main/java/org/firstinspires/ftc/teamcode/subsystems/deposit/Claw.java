@@ -11,8 +11,9 @@ public class Claw {
     public final nPriorityServo mode;
     public final nPriorityServo pitch;
 
-    static final double extendPos = 1.0; // TODO: find out the extended position
-    static final double retractPos = 0.0; // TODO: find out the retracted position
+    static final double PIXEL_VERTICAL_CENTER_DISTANCE = Math.sqrt(6); // 2cos(pi/6) inches
+    static final double EXTEND_POS = 1.0; // TODO: find out the extended position
+    static final double RETRACT_POS = 0.0; // TODO: find out the retracted position
 
     public Claw(Robot robot) {
 
@@ -43,11 +44,11 @@ public class Claw {
     }
 
     public void open() {
-        mode.setTargetPos(extendPos, 1.0);
+        mode.setTargetPos(EXTEND_POS, 1.0);
     }
 
     public void close() {
-        mode.setTargetPos(retractPos, 1.0);
+        mode.setTargetPos(RETRACT_POS, 1.0);
     }
 
     public void rotateToTransfer(double armAngle) { // TODO: this assumes that the claw is parallel to the floor during transfer, idk what else it could be but need to confirm this
@@ -64,8 +65,6 @@ public class Claw {
         pitch.setTargetAngle(-armAngle, 1.0);
     }
 
-    public boolean inPosition() {
-        return mode.inPosition() && pitch.inPosition();
-    }
+    public boolean inPosition() { return mode.inPosition() && pitch.inPosition(); }
 
 }

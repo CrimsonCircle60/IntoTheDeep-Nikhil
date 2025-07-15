@@ -27,7 +27,7 @@ public class DefensiveAutoForZaiden extends LinearOpMode {
         Globals.RUNMODE = RunMode.AUTO;
         Globals.isRed = false;
         Globals.hasSamplePreload = false;
-        Globals.hasSpecimenPreload = false;
+        Globals.hasColorlessPixelPreload = false;
 
         robot = new Robot(hardwareMap);
         robot.setStopChecker(this::isStopRequested);

@@ -78,7 +78,7 @@ public class nPriorityServo extends PriorityDevice {
         return pos;
     }
 
-    private double convertAngleToPos(double ang) {
+    public double convertAngleToPos(double ang) { // why is this normally private? I'm trying to figure out a way to get the extendo length in another class
         ang *= type.positionPerRadian;
         ang += basePos;
         return ang;

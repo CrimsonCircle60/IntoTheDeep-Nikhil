@@ -33,7 +33,7 @@ public class SpecimenPreloadAuto extends LinearOpMode {
         Globals.RUNMODE = RunMode.AUTO;
         Globals.isRed = false;
         Globals.hasSamplePreload = false;
-        Globals.hasSpecimenPreload = true;
+        Globals.hasColorlessPixelPreload = true;
 
         robot = new Robot(hardwareMap);
         robot.setStopChecker(this::isStopRequested);

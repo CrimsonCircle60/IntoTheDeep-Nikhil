@@ -62,7 +62,7 @@ public class SamplePreloadCycleAuto extends LinearOpMode {
         Globals.isRed = false;
         Globals.RUNMODE = RunMode.AUTO;
         Globals.hasSamplePreload = true;
-        Globals.hasSpecimenPreload = false;
+        Globals.hasColorlessPixelPreload = false;
 
         robot = new Robot(hardwareMap);
         robot.setStopChecker(this::isStopRequested);
@@ -638,7 +638,7 @@ public class SamplePreloadCycleAuto extends LinearOpMode {
         Globals.isRed = false;
         Globals.RUNMODE = RunMode.AUTO;
         Globals.hasSamplePreload = true;
-        Globals.hasSpecimenPreload = false;
+        Globals.hasColorlessPixelPreload = false;
 
         robot = new Robot(hardwareMap);
         robot.setAbortChecker(() -> !isStopRequested());

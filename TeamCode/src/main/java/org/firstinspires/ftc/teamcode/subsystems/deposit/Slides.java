@@ -12,11 +12,6 @@ import org.firstinspires.ftc.teamcode.utils.priority.PriorityMotor;
 
 @Config
 public class Slides {
-    public enum Type{
-        HORIZONTAL,
-        VERTICAL,
-        ARM
-    }
 
     //public static double maxVel = 55.75589743589743;
     //public static double kP = 0.8;

@@ -32,7 +32,7 @@ public class Teleop extends LinearOpMode {
         Globals.RUNMODE = RunMode.TELEOP;
         Globals.TESTING_DISABLE_CONTROL = false;
         Globals.hasSamplePreload = false;
-        Globals.hasSpecimenPreload = false;
+        Globals.hasColorlessPixelPreload = false;
 
         Robot robot = new Robot(hardwareMap);
         robot.setStopChecker(this::isStopRequested);

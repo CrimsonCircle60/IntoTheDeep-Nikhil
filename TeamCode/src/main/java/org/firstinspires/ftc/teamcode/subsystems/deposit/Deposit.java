@@ -19,6 +19,10 @@ public class Deposit {
         TEST
     }
 
+    public static final double PIXEL_DEPOSIT_HEIGHT = 30.0; // inches; TODO: need to find the actual target height for the pixel
+    public static final double SAMPLE_DEPOSIT_HEIGHT = 16.5; // inches; TODO: need to find the actual target height for the sample
+    public static final double PIXEL_DEPOSIT_ERROR_THRESH = 0.3; // inches
+
     public State state;
 
     private final Robot robot;
@@ -27,10 +31,13 @@ public class Deposit {
     public final Claw claw;
 
     // prepare for transfer positions
-    public static double intakeWaitRad = -Math.toRadians(45), intakeWaitY = 7.0, intakeWaitClawRad = 0;
+    public static double transferRad = -Math.toRadians(45), transferY = 7.0;
 
-    // transfer positions, move in to grab
-    public static double intakeRad = -Math.toRadians(45), intakeY = 5.0, intakeClawRad = 0.0;
+    // deposit positions
+    public static double depositPixelRad = Math.toRadians(45), depositPixelY = 26.0;
+    public static double depositSampleRad = Math.toRadians(45), depositSampleY = 10.0;
+
+    public static int relicType = Globals.hasSamplePreload ? 2 : Globals.hasColorfulPixelPreload ? 1 : Globals.hasColorlessPixelPreload ? 0 : -1;
 
     // moving positions with a sample
     public static double sampleHoldRad = 0.0, holdY = 0.0, sampleHoldClawRad = -Math.PI / 2;
@@ -46,7 +53,7 @@ public class Deposit {
     // specimen chamber positions
     public static double speciLSY = 18.4;
     public static double  speciHRad = 2.5, speciHClawRad = -1.5, speciHY = 18.6;
-    // TODO: ^ These values look about fine tbh, just had to reverse the sign of the claw. Need to test
+
 
     private long currentTime = -1;
     private long specimenReleaseTime = -1;
@@ -82,26 +89,25 @@ public class Deposit {
 
     public void update(){
         currentTime = System.nanoTime();
-
         switch (state) {
             case IDLE:
                 // idk what to do here, I figure the bot is put into TRANSFER_INTO_IDLE_TRANSFER from somewhere else cause IDLE is basically to prevent movement during the hot start of auto
                 break;
             case READY_FOR_TRANSFER:
                 readyForTransfer();
-                if (ready()) state = State.TRANSFER_INTO_IDLE_TRANSFER;
+                if (relicType != -1) state = State.TRANSFER_INTO_IDLE_TRANSFER;
                 break;
             case TRANSFER_INTO_IDLE_TRANSFER:
                 transferIntoIdleTransfer();
-                state = getRelicType() == 3 ? State.READY_FOR_DEPOSIT_SAMPLE : State.READY_FOR_DEPOSIT_PIXEL;
+                state = relicType == 2 ? State.READY_FOR_DEPOSIT_SAMPLE : State.READY_FOR_DEPOSIT_PIXEL;
                 break;
             case READY_FOR_DEPOSIT_PIXEL:
                 readyForDepositPixel();
-                if (ready()) state = State.DEPOSIT;
+                if (inPositionForDeposit()) state = State.DEPOSIT;
                 break;
             case READY_FOR_DEPOSIT_SAMPLE:
                 readyForDepositSample();
-                if (ready()) state = State.DEPOSIT;
+                if (inPositionForDeposit()) state = State.DEPOSIT;
                 break;
             case DEPOSIT:
                 deposit();
@@ -145,26 +151,39 @@ public class Deposit {
 
     public void readyForTransfer(){
         // close the claw whilst the claw is out of range of internal components, then descend for transfer and open claw when in position
+        claw.close();
+        verticalSlides.setTargetLength(transferY);
+        arm.setArmRotation(transferRad, 1.0);
+        robot.waitWhile(claw::inPosition);
+        robot.waitWhile(arm::inPosition);
+        robot.waitWhile(verticalSlides::inPosition);
     }
 
     public void transferIntoIdleTransfer() {
         // close claw (transfer) and wait until claw is closed
+        claw.close();
+        robot.waitWhile(claw::inPosition);
     }
 
     public void readyForDepositPixel() {
         // raise & rotate to position determined by constant IK & no other deposit movement until readied
+
     }
 
     public void readyForDepositSample() {
         // raise & rotate to position determined by constant IK & no other deposit movement until readied
+
     }
 
     public void deposit() {
         // open the claw, wait till claw opened and an additional 30 ms before transitioning to readyForTransfer
+        claw.open();
+        robot.waitFor(30);
     }
 
-    public byte getRelicType() {
-        // TODO: use the sensors here to determine what relic was intaken/transferred
+    public int getRelicType() {
+        // TODO: use Intake.java to setRelicType when it intakes stuff so it isn't called constantly
+        // this deals with errors like seeing nothing in the intake because the relic has been transferred
         /*
         -1 -> nothing
         0  -> colorless pixel
@@ -174,34 +193,31 @@ public class Deposit {
         return -1; // for now
     }
 
-    public boolean ready() {
-        switch(state) {
-            case READY_FOR_TRANSFER:
-                return getRelicType() != -1;
-            case READY_FOR_DEPOSIT_PIXEL:
-            case READY_FOR_DEPOSIT_SAMPLE:
-                return inPosition();
-        }
-
-        return false; // in the event this method was not meant to be called, its safer to not allow something to happen
-    }
-
-    public boolean inPosition() {
+    public boolean inPositionForDeposit() {
         // inPosition should incorporate Drivetrain stuff to make sure robot is in position for deposit
         if (state == State.READY_FOR_DEPOSIT_PIXEL) {
+            if (relicType == -1) { state = State.READY_FOR_TRANSFER; return false; }
+            if (relicType == 2) {state = State.READY_FOR_DEPOSIT_SAMPLE; return false; }
+
+            // verify that the claw is rotated appropriately for proper deposit
+            if (!claw.inPosition()) return false;
+
             // verify that the target height has been achieved first (this is IK stuff)
+            if (Math.abs(PIXEL_DEPOSIT_HEIGHT - (VerticalSlides.MIN_HEIGHT + verticalSlides.getLength() + arm.getArmHeight() + Claw.PIXEL_VERTICAL_CENTER_DISTANCE)) < PIXEL_DEPOSIT_ERROR_THRESH) {
+                switch (relicType) { // then verify drivetrain stuff
+                    case 0:
+                        // TODO: need to figure out vision & odometry for this one
+                        break;
+                    case 1:
 
-            switch(getRelicType()) { // then verify drivetrain stuff
-                case 0:
-
-                    break;
-                case 1:
-
-                    break;
-            }
+                        break;
+                }
+            } else return false;
         } else if (state == State.READY_FOR_DEPOSIT_SAMPLE) {
             // verify that the target height has been achieved first (this is IK stuff)
+            if (SAMPLE_DEPOSIT_HEIGHT - (VerticalSlides.MIN_HEIGHT + verticalSlides.getLength() + arm.getArmHeight()) > 0) return false;
             // then verify drivetrain stuff
+            // TODO: need to figure out coordinate system & where its centered
         }
 
         return false; // if nothing works

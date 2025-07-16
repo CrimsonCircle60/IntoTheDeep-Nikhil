@@ -1,0 +1,23 @@
+package org.firstinspires.ftc.teamcode.subsystems.hang;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.utils.priority.PriorityMotor;
+import org.firstinspires.ftc.teamcode.utils.priority.nPriorityServo;
+
+import org.firstinspires.ftc.teamcode.RobotNM;
+
+public class HangOliver {
+    private PriorityMotor vert1, vert2;
+    private RobotNM robot;
+
+    public HangOliver(RobotNM robot) {
+        this.robot = robot;
+        vert1 = new PriorityMotor(robot.hardwareMap.get(DcMotorEx.class, "vert1"), "vert1", 3, 6, robot.sensors);
+        vert2 = new PriorityMotor(robot.hardwareMap.get(DcMotorEx.class, "vert2"), "vert2", 3, 6, robot.sensors);
+        robot.hardwareQueue.addDevices(vert1, vert2);
+    }
+
+    public void update() {
+
+    }
+}

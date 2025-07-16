@@ -9,6 +9,10 @@ import org.firstinspires.ftc.teamcode.utils.priority.nPriorityServo;
 
 @Config
 public class Arm {
+    public static final double MAX_LENGTH = 8;
+    public static final double MIN_LENGTH = 4;
+    public static final double HALF_LENGTH = (MAX_LENGTH + MIN_LENGTH) / 2;
+
     public final Sensors sensors;
 
     public final nPriorityServo armRotation;
@@ -36,7 +40,7 @@ public class Arm {
                 nPriorityServo.ServoType.AXON_MAX, // TODO: find out the type of servo used here
                 0, // TODO: find parameters
                 1, // TODO
-                0.32, // TODO: figure
+                0.32, // TODO:
                 new boolean[] {false, true}, // TODO: idk the proper order here, figure that out
                 1.0,
                 2.0
@@ -46,9 +50,13 @@ public class Arm {
 
     public void setArmRotation(double targetRad, double power) { armRotation.setTargetAngle(targetRad, power); }
 
+    public void setExtendoLength(double targetPos, double power) { extendo.setTargetPos(targetPos, power); } // TODO: maybe do it in angles?
+
     public boolean inPosition() { return armRotation.inPosition() && extendo.inPosition(); }
 
-    public double getArmHeight() { return extendo.convertAngleToPos(extendo.getCurrentAngle()) * Math.sin(armRotation.getCurrentAngle()); }
+    public double getArmHeight() { return getLength() * Math.sin(armRotation.getCurrentAngle()); }
+
+    public double getLength() { return 1.0; } // TODO: figure out how to get extendo length properly
 
     public double getAngle() { return armRotation.getCurrentAngle(); }
 }

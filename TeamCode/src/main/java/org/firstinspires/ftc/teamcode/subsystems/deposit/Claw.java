@@ -51,11 +51,11 @@ public class Claw {
         mode.setTargetPos(RETRACT_POS, 1.0);
     }
 
-    public void rotateToTransfer(double armAngle) { // TODO: this assumes that the claw is parallel to the floor during transfer, idk what else it could be but need to confirm this
+    public void rotateToTransfer(double armAngle) {
         pitch.setTargetAngle(-armAngle, 1.0);
     }
 
-    public void rotateToPixelTransfer(double armAngle) {
+    public void rotateToPixelDeposit(double armAngle) {
         // targetAngle + armAngle = pi / 2, assuming the 0 angle is the x axis elevated to h knot
         // logic: the total angle should have the claw aligned to the walls for pixel deposit
         pitch.setTargetAngle(Math.PI / 2 - armAngle, 1.0);

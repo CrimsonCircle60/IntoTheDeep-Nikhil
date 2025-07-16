@@ -31,14 +31,18 @@ public class Deposit {
     public final Claw claw;
 
     // prepare for transfer positions
-    public static double transferRad = -Math.toRadians(45), transferY = 7.0;
+    public static double transferRad = -Math.toRadians(45), transferY = 7.0, transferLength = 5.0; // for now, TODO: find actual transfer parameters
 
     // deposit positions
-    public static double depositPixelRad = Math.toRadians(45), depositPixelY = 26.0;
-    public static double depositSampleRad = Math.toRadians(45), depositSampleY = 10.0;
+    public static double depositPixelRad = Math.toRadians(30), depositPixelY = PIXEL_DEPOSIT_HEIGHT - Arm.HALF_LENGTH / 2 - Claw.PIXEL_VERTICAL_CENTER_DISTANCE - VerticalSlides.MIN_HEIGHT;
+    public static double depositSampleRad = Math.toRadians(30), depositSampleY = SAMPLE_DEPOSIT_HEIGHT - Arm.MAX_LENGTH / 2 - VerticalSlides.MIN_HEIGHT;
+    private boolean reachedDepositY = false;
 
     public static int relicType = Globals.hasSamplePreload ? 2 : Globals.hasColorfulPixelPreload ? 1 : Globals.hasColorlessPixelPreload ? 0 : -1;
 
+    private long currentTime = -1;
+
+    /*
     // moving positions with a sample
     public static double sampleHoldRad = 0.0, holdY = 0.0, sampleHoldClawRad = -Math.PI / 2;
     public static double specimenGrabRad = 0.04, specimenGrabClawRad = 0.0, specimenConfirmRad = Math.toRadians(40), specimenConfirmClawRad = Math.toRadians(40);
@@ -54,8 +58,9 @@ public class Deposit {
     public static double speciLSY = 18.4;
     public static double  speciHRad = 2.5, speciHClawRad = -1.5, speciHY = 18.6;
 
+     */
 
-    private long currentTime = -1;
+    /*
     private long specimenReleaseTime = -1;
     public static int sampleReleaseDuration = 300;
     public static int specimenReleaseDuration = 700;
@@ -74,15 +79,17 @@ public class Deposit {
     public HangMode hangMode = HangMode.OFF;
     public boolean holdSlides = false;
 
+     */
+
     public Deposit(Robot robot){
         this.robot = robot;
 
         verticalSlides = new VerticalSlides(this.robot);
+        verticalSlides.setSlidesMotorsToBrake(); // any reason not to do this?
         arm = new Arm(this.robot);
         claw = new Claw(this.robot);
 
         state = Globals.RUNMODE == RunMode.TELEOP ? State.READY_FOR_TRANSFER : Globals.RUNMODE == RunMode.TESTER ? State.TEST : State.IDLE; // only other option is AUTO in which it starts in IDLE
-        // TODO: need to figure out how to log what state the robot was in during auto
         // currently assumes that the robot will be in READY_FOR_TRANSFER by the end of auto, which I could make happen
         // perhaps with a byte in Globals for the state represented by 0 to 4?
     }
@@ -117,12 +124,11 @@ public class Deposit {
                 break;
         }
 
-        if (holdSlides) {
-            verticalSlides.setTargetLength(targetY);
-        }
+//        if (holdSlides) { verticalSlides.setTargetLength(targetY); }
 
         verticalSlides.update();
 
+        /*
         if (hangMode == HangMode.PULL) {
             verticalSlides.setTargetPowerFORCED(-0.9);
             targetY = verticalSlides.getLength() - 0.5;
@@ -131,27 +137,24 @@ public class Deposit {
             targetY = verticalSlides.getLength() + 0.5;
         }
         if (hangMode != HangMode.OFF) holdSlides = true;
+        */
 
         TelemetryUtil.packet.put("Deposit.state", this.state);
         LogUtil.depositState.set(this.state.toString());
-        TelemetryUtil.packet.put("Deposit.targetY", this.targetY);
+//        TelemetryUtil.packet.put("Deposit.targetY", this.targetY);
         TelemetryUtil.packet.put("Deposit: Arm inPosition", arm.inPosition());
         TelemetryUtil.packet.put("Deposit: Slides inPosition", verticalSlides.inPosition(0.5));
         TelemetryUtil.packet.put("Deposit: Arm inPosition", arm.inPosition());
         TelemetryUtil.packet.put("Deposit: Claw inPosition", claw.inPosition());
-        TelemetryUtil.packet.put("Deposit: Hanging", hangMode);
+//        TelemetryUtil.packet.put("Deposit: Hanging", hangMode);
 
-        hangMode = HangMode.OFF;
-    }
-
-    public void moveToWithRad(double armTargetRad, double targetY){
-        arm.setArmRotation(armTargetRad, 1.0);
-        verticalSlides.setTargetLength(targetY);
+//        hangMode = HangMode.OFF;
     }
 
     public void readyForTransfer(){
         // close the claw whilst the claw is out of range of internal components, then descend for transfer and open claw when in position
         claw.close();
+        claw.rotateToTransfer(arm.getAngle());
         verticalSlides.setTargetLength(transferY);
         arm.setArmRotation(transferRad, 1.0);
         robot.waitWhile(claw::inPosition);
@@ -163,16 +166,31 @@ public class Deposit {
         // close claw (transfer) and wait until claw is closed
         claw.close();
         robot.waitWhile(claw::inPosition);
+        stop();
     }
 
     public void readyForDepositPixel() {
         // raise & rotate to position determined by constant IK & no other deposit movement until readied
-
+        arm.setArmRotation(depositPixelRad, 1.0);
+        arm.setExtendoLength(Arm.HALF_LENGTH, 1.0);
+        claw.rotateToPixelDeposit(arm.armRotation.getCurrentAngle());
+        if (!reachedDepositY) verticalSlides.setTargetLength(depositPixelY);
+        if (!reachedDepositY && verticalSlides.inPosition(0.3)) { verticalSlides.setTargetLength(verticalSlides.getLength()); reachedDepositY = true; }
+        if (reachedDepositY) {
+            arm.setArmRotation(Math.asin((PIXEL_DEPOSIT_HEIGHT - verticalSlides.getLength() - Claw.PIXEL_VERTICAL_CENTER_DISTANCE - VerticalSlides.MIN_HEIGHT) / arm.getLength()), 1.0);
+        }
     }
 
     public void readyForDepositSample() {
         // raise & rotate to position determined by constant IK & no other deposit movement until readied
-
+        arm.setArmRotation(depositSampleRad, 1.0);
+        arm.setExtendoLength(Arm.MAX_LENGTH, 1.0);
+        claw.rotateToSampleDeposit(arm.getAngle());
+        if (!reachedDepositY) verticalSlides.setTargetLength(depositSampleY);
+        if (!reachedDepositY && verticalSlides.inPosition(0.3)) { verticalSlides.setTargetLength(verticalSlides.getLength()); reachedDepositY = true; }
+        if (reachedDepositY) {
+            arm.setArmRotation(Math.asin((SAMPLE_DEPOSIT_HEIGHT - verticalSlides.getLength() - VerticalSlides.MIN_HEIGHT) / arm.getLength()), 1.0);
+        }
     }
 
     public void deposit() {
@@ -197,7 +215,7 @@ public class Deposit {
         // inPosition should incorporate Drivetrain stuff to make sure robot is in position for deposit
         if (state == State.READY_FOR_DEPOSIT_PIXEL) {
             if (relicType == -1) { state = State.READY_FOR_TRANSFER; return false; }
-            if (relicType == 2) {state = State.READY_FOR_DEPOSIT_SAMPLE; return false; }
+            if (relicType == 2) { state = State.READY_FOR_DEPOSIT_SAMPLE; return false; }
 
             // verify that the claw is rotated appropriately for proper deposit
             if (!claw.inPosition()) return false;
@@ -207,10 +225,13 @@ public class Deposit {
                 switch (relicType) { // then verify drivetrain stuff
                     case 0:
                         // TODO: need to figure out vision & odometry for this one
-                        break;
+                        stop();
+                        reachedDepositY = false;
+                        return true;
                     case 1:
-
-                        break;
+                        stop();
+                        reachedDepositY = false;
+                        return true;
                 }
             } else return false;
         } else if (state == State.READY_FOR_DEPOSIT_SAMPLE) {
@@ -218,11 +239,22 @@ public class Deposit {
             if (SAMPLE_DEPOSIT_HEIGHT - (VerticalSlides.MIN_HEIGHT + verticalSlides.getLength() + arm.getArmHeight()) > 0) return false;
             // then verify drivetrain stuff
             // TODO: need to figure out coordinate system & where its centered
+            stop();
+            reachedDepositY = false;
+            return true;
+
         }
 
         return false; // if nothing works
     }
 
+    private void stop() {
+        arm.setArmRotation(arm.getAngle(), 1.0);
+        arm.setExtendoLength(arm.getLength(), 1.0);
+        verticalSlides.setTargetLength(verticalSlides.getLength());
+    }
+
+    /*
     private double targetY = speciHY;
     public void setDepositHeight(double target){
         this.targetY = Utils.minMaxClip(target, 0.0, VerticalSlides.maxSlidesHeight);
@@ -270,4 +302,5 @@ public class Deposit {
     public boolean isRetractDone(){
         return state == State.IDLE;
     }
+     */
 }
